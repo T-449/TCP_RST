@@ -1,0 +1,5 @@
+sudo chown root:root run.sh
+./run.sh
+
+
+Change the interface to sniff and send packets through by providing name of interface in char array "dev" in packetSniffer.cpp and char array "interface" in packetSender.cpp respectively.
