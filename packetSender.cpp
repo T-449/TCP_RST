@@ -21,6 +21,9 @@ using namespace std;
 
 struct spoofedcontent
 {
+  unsigned char temps[6];
+  unsigned char tempd[6];
+
   // tcpHeader 
   u_int16_t sourcePort;                  
   u_int16_t destinationPort;
@@ -34,8 +37,8 @@ struct spoofedcontent
 
 struct ethernetheader
 {
-  unsigned char sourceInterface[ETH_ALEN];
   unsigned char destinationInterface[ETH_ALEN];
+  unsigned char sourceInterface[ETH_ALEN];
   unsigned short protocol;
 };
 
@@ -113,7 +116,7 @@ void sendResetPacket(spoofedcontent &spoofedContent)
     struct tcpheader *tcpHeader = (struct tcpheader *) (packet + sizeof (struct ipheader) + sizeof (struct ethernetheader));
     struct pseudoheader pseudoHeader;
 
-    char interface[] = "lo";
+    char interface[] = "ens33";
     unsigned char destinationMAC[ETH_ALEN] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     unsigned char sourceMAC[ETH_ALEN] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     
@@ -142,8 +145,13 @@ void sendResetPacket(spoofedcontent &spoofedContent)
       interfaceIndex = interfaceInfo.ifr_ifindex;
     }
 
-    memcpy(ethernetHeader->sourceInterface, sourceMAC, ETH_ALEN);
-    memcpy(ethernetHeader->destinationInterface, destinationMAC, ETH_ALEN);
+    //memcpy(ethernetHeader->sourceInterface, sourceMAC, ETH_ALEN);
+    //memcpy(ethernetHeader->destinationInterface, destinationMAC, ETH_ALEN);
+
+    //test
+    memcpy(ethernetHeader->sourceInterface, spoofedContent.temps, ETH_ALEN);
+    memcpy(ethernetHeader->destinationInterface, spoofedContent.tempd, ETH_ALEN);
+
     ethernetHeader->protocol = htons(ETH_P_IP);      // represents that the next header is that of IP
 
 

