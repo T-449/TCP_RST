@@ -1,5 +1,5 @@
 #include <pcap.h>
-#include "packetSender.cpp"
+#include "packetSender.h"
 
 void processPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *buffer)
 {
