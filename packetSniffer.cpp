@@ -11,7 +11,7 @@ void processPacket(u_char *args, const struct pcap_pkthdr *header, const u_char 
 	struct tcpheader *tcpHeader = (struct tcpheader*)(buffer + sizeof(struct ipheader) + sizeof(struct ethernetheader));
 	if(ipHeader->protocol == 6 && ipHeader->sourceIPAddress == inet_addr("192.168.0.111") && ipHeader->destinationIPAddress == inet_addr("192.168.0.101"))
 	{
-		if(tcpHeader->flag_ACK && !(tcpHeader->flag_PSH  || tcpHeader->flag_PSH || tcpHeader->flag_FIN))
+		if(tcpHeader->flag_ACK && !(tcpHeader->flag_PSH  || tcpHeader->flag_SYN || tcpHeader->flag_FIN))
 		{
 			sourceIP.s_addr = ipHeader->sourceIPAddress;
 			destinationIP.s_addr = ipHeader->destinationIPAddress;
